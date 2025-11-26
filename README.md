@@ -24,7 +24,8 @@ This template is meant for monitoring Aruba Clear Pass Policy Manager appliances
 2) Create SNMP credentials on Aruba Clear Pass Policy Manager.
 3) Create the Zabbix host with an SNMP interface and assign the ***Aruba Clear Pass Policy Manager SNMP*** template.
 
-> [!TIP] You can personalize the Zabbix template behaviours using MACROS.
+> [!TIP]
+> You can personalize the Zabbix template behaviours using MACROS.
 
 ## Contribute
 
