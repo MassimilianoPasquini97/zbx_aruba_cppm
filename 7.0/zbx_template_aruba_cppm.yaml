@@ -1,0 +1,743 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: e0b51422a43945ff88a4eb5e4e3c145d
+      template: 'Aruba Clear Pass Policy Manager SNMP'
+      name: 'Aruba Clear Pass Policy Manager SNMP'
+      description: |
+        Aruba Clear Pass Policy Manager monitoring with SNMP MIB CPPM-MIB
+        
+        https://mibbrowser.online/mibdb_search.php?mib=CPPM-MIB
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: ab1e8fe48263455a86c46131a1c7cbdc
+          name: 'System Node Type'
+          type: DEPENDENT
+          key: cppmClusterNodeType
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.5.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          triggers:
+            - uuid: b9ad3afecc7e41b6957be45d9f0152e3
+              expression: 'change(/Aruba Clear Pass Policy Manager SNMP/cppmClusterNodeType)=1'
+              name: 'Cluster Node Type Changed to "{ITEM.VALUE}"'
+              priority: INFO
+        - uuid: b61b36e0e0e44567a29dbde1f536eef9
+          name: 'System Cluster Nodes'
+          type: DEPENDENT
+          key: cppmNumClusterNodes
+          delay: '0'
+          history: 1h
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.7.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+        - uuid: 522e3bd1ac8f4c3683b58154aea73435
+          name: 'System IP'
+          type: DEPENDENT
+          key: cppmNwMgmtPortIPAddress
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.8.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          triggers:
+            - uuid: 42f854bf35334312802b5becfd7ae898
+              expression: 'change(/Aruba Clear Pass Policy Manager SNMP/cppmNwMgmtPortIPAddress)=1'
+              name: 'IP Changed to "{ITEM.VALUE}"'
+              priority: INFO
+        - uuid: 464f421d5c274386ad96935f637cf268
+          name: 'System Macaddress'
+          type: DEPENDENT
+          key: cppmNwMgmtPortMACAddress
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.9.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          triggers:
+            - uuid: a1dae969cf0d49548742f22a5653e9e3
+              expression: 'change(/Aruba Clear Pass Policy Manager SNMP/cppmNwMgmtPortMACAddress)=1'
+              name: 'Macaddress Changed to "{ITEM.VALUE}"'
+              priority: INFO
+        - uuid: 1456edfe51c54eb59807dd6077345a3a
+          name: 'System Disk Space Free'
+          type: DEPENDENT
+          key: cppmSystemDiskSpaceFree
+          delay: '0'
+          history: 7h
+          units: B
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.15.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          tags:
+            - tag: disk
+        - uuid: 63235c2443f14c0c84cb6501812ec132
+          name: 'System Disk Space Total'
+          type: DEPENDENT
+          key: cppmSystemDiskSpaceTotal
+          delay: '0'
+          history: 1h
+          trends: '0'
+          units: B
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.14.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          tags:
+            - tag: disk
+        - uuid: ed33a9f499c549b997546942ee83e1c8
+          name: 'System Disk Space Used'
+          type: CALCULATED
+          key: cppmSystemDiskSpaceUsed
+          delay: '{$UPDATE_INTERVAL}'
+          history: 7h
+          units: B
+          params: last(//cppmSystemDiskSpaceTotal)-last(//cppmSystemDiskSpaceFree)
+          tags:
+            - tag: disk
+        - uuid: 94171c436e374bf9a5333b3280a7ff7e
+          name: 'System Disk Space Used %'
+          type: CALCULATED
+          key: cppmSystemDiskSpaceUsedP
+          delay: '{$UPDATE_INTERVAL}'
+          history: 7h
+          value_type: FLOAT
+          units: '%'
+          params: 'round((last(//cppmSystemDiskSpaceTotal)-last(//cppmSystemDiskSpaceFree))/last(//cppmSystemDiskSpaceTotal)*100,2)'
+          tags:
+            - tag: disk
+          triggers:
+            - uuid: 8f68fbc990d4430d8f4f58b52a6f065e
+              expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/cppmSystemDiskSpaceUsedP, 1h)>{$TRIGGER_DISK_UTILIZATION}'
+              name: 'Disk Usage at "{ITEM.VALUE}"'
+              priority: AVERAGE
+        - uuid: 5eade09a52144fc287edf04fa96c5ec5
+          name: 'System Hostname'
+          type: DEPENDENT
+          key: cppmSystemHostname
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.4.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          triggers:
+            - uuid: 29d73bd8540f4959b43f68fb53387877
+              expression: 'change(/Aruba Clear Pass Policy Manager SNMP/cppmSystemHostname)=1'
+              name: 'Hostname Changed to "{ITEM.VALUE}"'
+              priority: INFO
+        - uuid: 16734b47e03d4542a82e9c234a4bdf38
+          name: 'System Memory Free'
+          type: DEPENDENT
+          key: cppmSystemMemoryFree
+          delay: '0'
+          history: 7h
+          units: B
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.13.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          tags:
+            - tag: memory
+        - uuid: f7c163a6b4ae4770ab9870ccdbdb491e
+          name: 'System Memory Total'
+          type: DEPENDENT
+          key: cppmSystemMemoryTotal
+          delay: '0'
+          history: 1h
+          trends: '0'
+          units: B
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.12.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          tags:
+            - tag: memory
+        - uuid: feed7f98c6e64319a066fb895464e3d4
+          name: 'System Memory Used'
+          type: CALCULATED
+          key: cppmSystemMemoryUsed
+          delay: '{$UPDATE_INTERVAL}'
+          history: 7h
+          units: B
+          params: last(//cppmSystemMemoryTotal)-last(//cppmSystemMemoryFree)
+          tags:
+            - tag: memory
+        - uuid: 5e05e89b93d74435abe9e11e1b68be9b
+          name: 'System Memory Used %'
+          type: CALCULATED
+          key: cppmSystemMemoryUsedP
+          delay: '{$UPDATE_INTERVAL}'
+          history: 7h
+          value_type: FLOAT
+          units: '%'
+          params: 'round((last(//cppmSystemMemoryTotal)-last(//cppmSystemMemoryFree))/last(//cppmSystemMemoryTotal)*100,2)'
+          tags:
+            - tag: memory
+          triggers:
+            - uuid: 6b1f7c0b79484eec86dd0e32d19535dd
+              expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/cppmSystemMemoryUsedP, {$TRIGGER_MEM_TIME_RANGE})>{$TRIGGER_MEM_UTILIZATION}'
+              name: 'Memory Usage at "{ITEM.VALUE}" in last {$TRIGGER_MEM_TIME_RANGE}'
+              priority: AVERAGE
+        - uuid: 7dbe52cfbf104da28d4357083bda3c78
+          name: 'System Model'
+          type: DEPENDENT
+          key: cppmSystemModel
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.1.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+        - uuid: 0c07fd0c58c348cbb09a65d412b56c75
+          name: 'System CPU Core'
+          type: DEPENDENT
+          key: cppmSystemNumCPUs
+          delay: '0'
+          history: 1h
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.16.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+        - uuid: 4b0fed35f343480e9464c4b3b6aceea4
+          name: 'System Serial Number'
+          type: DEPENDENT
+          key: cppmSystemSerialNumber
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.2.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+        - uuid: a9e9b09c484a44d5bfa5ea51c9ac01e5
+          name: 'System Uptime'
+          type: DEPENDENT
+          key: cppmSystemUptime
+          delay: '0'
+          history: 1h
+          trends: '0'
+          units: uptime
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.17.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          triggers:
+            - uuid: 310f6328920440f7967b54386966bec9
+              expression: 'last(/Aruba Clear Pass Policy Manager SNMP/cppmSystemUptime)<last(/Aruba Clear Pass Policy Manager SNMP/cppmSystemUptime,#2)'
+              name: 'Rebooted, last Uptime "{ITEM.VALUE2}"'
+              priority: INFO
+        - uuid: 5144bec96310469590d56908a0b0b53b
+          name: 'System Version'
+          type: DEPENDENT
+          key: cppmSystemVersion
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.3.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+          triggers:
+            - uuid: d8a93d30dd7443f5ba4b1e3bafbb34f5
+              expression: 'change(/Aruba Clear Pass Policy Manager SNMP/cppmSystemVersion)=1'
+              name: 'Version Changed to "{ITEM.VALUE}"'
+              priority: INFO
+        - uuid: e446f10c6bdf4f92aef2c9089be68f5c
+          name: 'System Zone Name'
+          type: DEPENDENT
+          key: cppmZoneName
+          delay: '0'
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.6.0
+                - '0'
+          master_item:
+            key: snmp.walk.cppmSystemTableEntry
+        - uuid: db47e4b4e4f74354907850feb1d45c15
+          name: 'Radius Time Total'
+          type: DEPENDENT
+          key: radAuthRequestTime
+          delay: '0'
+          history: 7d
+          units: ms
+          description: 'Total time taken (ms) for RADIUS request end-to-end.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.2.0
+                - '0'
+          master_item:
+            key: snmp.walk.radiusServerTableEntry
+          tags:
+            - tag: radius
+          triggers:
+            - uuid: 9318c572123f460aaa4c0fce7b5550c2
+              expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/radAuthRequestTime,{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_RAD_REQ_TIME}'
+              name: 'Radius Auth Request Time at "{ITEM.VALUE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+              priority: AVERAGE
+        - uuid: 64c809363ba74f2c9434d9a4dfa89ab7
+          name: 'Radius Time Policy Eval'
+          type: DEPENDENT
+          key: radPolicyEvalTime
+          delay: '0'
+          history: 7d
+          units: ms
+          description: 'Total time taken (ms) for policy evaluation from RADIUS server prespective.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.1.0
+                - '0'
+          master_item:
+            key: snmp.walk.radiusServerTableEntry
+          tags:
+            - tag: radius
+        - uuid: d2f0be0559474b7e8bad7c5035336d49
+          name: 'Radius Counter Total'
+          type: DEPENDENT
+          key: radServerCounterCount
+          delay: '0'
+          history: 7d
+          description: 'Total RADIUS request count.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.5.0
+                - '0'
+          master_item:
+            key: snmp.walk.radiusServerTableEntry
+          tags:
+            - tag: radius
+        - uuid: a5cb904940184343a4b880833d00a9c5
+          name: 'Radius Counter Failure'
+          type: DEPENDENT
+          key: radServerCounterFailure
+          delay: '0'
+          history: 7d
+          description: 'Failed RADIUS request count.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.4.0
+                - '0'
+          master_item:
+            key: snmp.walk.radiusServerTableEntry
+          tags:
+            - tag: radius
+        - uuid: d73fbd139ea84fe794ad0125e4bb577d
+          name: 'Radius Counter Success'
+          type: DEPENDENT
+          key: radServerCounterSuccess
+          delay: '0'
+          history: 7d
+          description: 'Successful RADIUS request count.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.3.0
+                - '0'
+          master_item:
+            key: snmp.walk.radiusServerTableEntry
+          tags:
+            - tag: radius
+        - uuid: f2718744c8d6416bb13c0596968694f2
+          name: 'SNMP Walk cppmSystemTableEntry'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[1.3.6.1.4.1.14823.1.6.1.1.1.1.1]'
+          key: snmp.walk.cppmSystemTableEntry
+          delay: '{$UPDATE_INTERVAL}'
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+        - uuid: dfbf7f51f24a43449fccf89c09fa0e52
+          name: 'SNMP Walk policyServerAutzTableEntry'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[1.3.6.1.4.1.14823.1.6.1.1.2.5.1]'
+          key: snmp.walk.policyServerAutzTableEntry
+          delay: '{$UPDATE_INTERVAL}'
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+        - uuid: a9c34863d39e4e32b4964a9a53889445
+          name: 'SNMP Walk policyServerProtoTableEntry'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[1.3.6.1.4.1.14823.1.6.1.1.2.4.1]'
+          key: snmp.walk.policyServerProtoTableEntry
+          delay: '{$UPDATE_INTERVAL}'
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+        - uuid: 20a550bb47a04206b78cdff9b44c2dba
+          name: 'SNMP Walk radiusServerTableEntry'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[1.3.6.1.4.1.14823.1.6.1.1.2.1.1]'
+          key: snmp.walk.radiusServerTableEntry
+          delay: '{$UPDATE_INTERVAL}'
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+        - uuid: 8558a569e35c4f58ad425b1c2c6596df
+          name: 'SNMP Walk tacacsAuthTableEntry'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[1.3.6.1.4.1.14823.1.6.1.1.2.7.1]'
+          key: snmp.walk.tacacsAuthTableEntry
+          delay: '{$UPDATE_INTERVAL}'
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+        - uuid: 516f404ed981418fa6fb447e7d2677b0
+          name: 'Tacacs Time Auth'
+          type: DEPENDENT
+          key: tacAuthCounterAuthTime
+          delay: '0'
+          history: 7d
+          units: ms
+          description: 'Time taken (ms) for TACACS+ authentications.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.5.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+        - uuid: 194e3a5abbc84a509223c2234aaa7ea8
+          name: 'Tacacs Counter Total'
+          type: DEPENDENT
+          key: tacAuthCounterCount
+          delay: '0'
+          history: 7d
+          description: 'Total number of TACACS+ authentications.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.3.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+        - uuid: b030006dd7234d4eb28c006d8fc5bf67
+          name: 'Tacacs Counter Failure'
+          type: DEPENDENT
+          key: tacAuthCounterFailure
+          delay: '0'
+          history: 7d
+          description: 'Total number of failed TACACS+ authentications.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.2.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+        - uuid: 6d3acb653cb54819b6235f1e40d3b265
+          name: 'Tacacs Counter Success'
+          type: DEPENDENT
+          key: tacAuthCounterSuccess
+          delay: '0'
+          history: 7d
+          description: 'Total number of successful TACACS+ authentications.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.1.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+        - uuid: b4f5d6cb3e2149aeb2f37cc03188d1ab
+          name: 'Tacacs Time Total'
+          type: DEPENDENT
+          key: tacAuthCounterTime
+          delay: '0'
+          history: 7d
+          units: ms
+          description: 'Total time taken (ms) to perform TACACS+ authentications end-to-end.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.4.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+          triggers:
+            - uuid: 49c1e6c2107346b6a296df0e540669d6
+              expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterTime,{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_TAC_REQ_TIME}'
+              name: 'Tacacs Auth Request Time at "{ITEM.VALUE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+              priority: AVERAGE
+        - uuid: 894391813613468f9fc39ab3b9258cb7
+          name: 'Tacacs Time Policy Eval'
+          type: DEPENDENT
+          key: tacPolicyEvalTime
+          delay: '0'
+          history: 7d
+          units: ms
+          description: 'Time taken (ms) for TACACS+ policy evaluation.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.7.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+        - uuid: b4df2b144a66426fa0228d397605ef43
+          name: 'Tacacs Time Service Policy Eval'
+          type: DEPENDENT
+          key: tacServicePolicyEvalTime
+          delay: '0'
+          history: 7d
+          units: ms
+          description: 'Time taken (ms) for TACACS+ service policy evaluation.'
+          preprocessing:
+            - type: SNMP_WALK_VALUE
+              parameters:
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.6.0
+                - '0'
+          master_item:
+            key: snmp.walk.tacacsAuthTableEntry
+          tags:
+            - tag: tacacs+
+      discovery_rules:
+        - uuid: ccf96ff0f7d947a9b79d5592504e4f1d
+          name: 'Discovery Server Auth'
+          type: DEPENDENT
+          key: discovery.policyServerAutzTableEntry
+          delay: '0'
+          item_prototypes:
+            - uuid: 8bbc0b486b554b13abff8f52f7af1606
+              name: 'Server Auth "{#SRV_NAME}": Counter Total'
+              type: DEPENDENT
+              key: 'psAutzCounterCount[{#SNMPINDEX}]'
+              delay: '0'
+              history: 7d
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '1.3.6.1.4.1.14823.1.6.1.1.2.5.1.5.{#SNMPINDEX}'
+                    - '0'
+              master_item:
+                key: snmp.walk.policyServerAutzTableEntry
+              tags:
+                - tag: 'Server Authentication'
+                  value: '{#SRV_NAME}'
+            - uuid: d6dbfd7b57534efe944bd8cc11ccea52
+              name: 'Server Auth "{#SRV_NAME}": Counter Failure'
+              type: DEPENDENT
+              key: 'psAutzCounterFailure[{#SNMPINDEX}]'
+              delay: '0'
+              history: 7d
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '1.3.6.1.4.1.14823.1.6.1.1.2.5.1.4.{#SNMPINDEX}'
+                    - '0'
+              master_item:
+                key: snmp.walk.policyServerAutzTableEntry
+              tags:
+                - tag: 'Server Authentication'
+                  value: '{#SRV_NAME}'
+            - uuid: 78e872bc1b714217a8931b393fb1be9a
+              name: 'Server Auth "{#SRV_NAME}": Counter Success'
+              type: DEPENDENT
+              key: 'psAutzCounterSuccess[{#SNMPINDEX}]'
+              delay: '0'
+              history: 7d
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '1.3.6.1.4.1.14823.1.6.1.1.2.5.1.3.{#SNMPINDEX}'
+                    - '0'
+              master_item:
+                key: snmp.walk.policyServerAutzTableEntry
+              tags:
+                - tag: 'Server Authentication'
+                  value: '{#SRV_NAME}'
+            - uuid: 1782b4432fc140de9e9723264099ce51
+              name: 'Server Auth "{#SRV_NAME}": Time'
+              type: DEPENDENT
+              key: 'psAutzCounterTime[{#SNMPINDEX}]'
+              delay: '0'
+              history: 7d
+              units: ms
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '1.3.6.1.4.1.14823.1.6.1.1.2.5.1.6.{#SNMPINDEX}'
+                    - '0'
+              master_item:
+                key: snmp.walk.policyServerAutzTableEntry
+              tags:
+                - tag: 'Server Authentication'
+                  value: '{#SRV_NAME}'
+              trigger_prototypes:
+                - uuid: d9996e937fe7474999119acff48cd855
+                  expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterTime[{#SNMPINDEX}],{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_PROTO_EVAL_TIME}'
+                  name: 'Server Authentication "{#SRV_NAME}": Time at "{ITEM.VALUE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+                  priority: AVERAGE
+          trigger_prototypes:
+            - uuid: fd099ae8dc9f41bb936c87841a4ee593
+              expression: '(max(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterFailure[{#SNMPINDEX}],{$TRIGGER_AUTH_FAILED_RANGE})-min(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterFailure[{#SNMPINDEX}],{$TRIGGER_AUTH_FAILED_RANGE}))>0 and (max(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterSuccess[{#SNMPINDEX}],{$TRIGGER_AUTH_FAILED_RANGE})-min(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterSuccess[{#SNMPINDEX}],{$TRIGGER_AUTH_FAILED_RANGE}))=0'
+              name: 'Server Authentication "{#SRV_NAME}": Only Failure Authentication in last {$TRIGGER_AUTH_FAILED_RANGE}'
+              priority: AVERAGE
+          master_item:
+            key: snmp.walk.policyServerAutzTableEntry
+          preprocessing:
+            - type: SNMP_WALK_TO_JSON
+              parameters:
+                - '{#SRV_NAME}'
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.5.1.2
+                - '0'
+        - uuid: 4ad927fa4352470295c87a1d272f0c76
+          name: 'Discovery Server Protocol'
+          type: DEPENDENT
+          key: discovery.policyServerProtoTableEntry
+          delay: '0'
+          item_prototypes:
+            - uuid: 4ca70d9802a94cdb97ed63cf96334839
+              name: 'Server Protocol "{#PROTO_NAME}": Eval Time'
+              type: DEPENDENT
+              key: 'psPolicyEvalTime[{#SNMPINDEX}]'
+              delay: '0'
+              history: 7d
+              units: ms
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '1.3.6.1.4.1.14823.1.6.1.1.2.4.1.3.{#SNMPINDEX}'
+                    - '0'
+              master_item:
+                key: snmp.walk.policyServerProtoTableEntry
+              tags:
+                - tag: 'Server Protocol'
+                  value: '{#PROTO_NAME}'
+              trigger_prototypes:
+                - uuid: 717b77621f5a4bd390ad8c11c3ffe034
+                  expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/psPolicyEvalTime[{#SNMPINDEX}],{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_PROTO_EVAL_TIME}'
+                  name: 'Server Protocol "{#PROTO_NAME}": Eval Time at "{ITEM.VALIE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+                  priority: AVERAGE
+          master_item:
+            key: snmp.walk.policyServerProtoTableEntry
+          preprocessing:
+            - type: SNMP_WALK_TO_JSON
+              parameters:
+                - '{#PROTO_NAME}'
+                - 1.3.6.1.4.1.14823.1.6.1.1.2.4.1.2
+                - '0'
+      macros:
+        - macro: '{$TRIGGER_AUTH_FAILED_RANGE}'
+          value: 30m
+          description: 'Trigger ''Only Radius/Tacacs Auth Failed in last ...'' time range'
+        - macro: '{$TRIGGER_AUTH_TIME_RANGE}'
+          value: 1h
+          description: 'Trigger ''Radius/Tacacs Auth Request Time'' time range'
+        - macro: '{$TRIGGER_DISK_UTILIZATION}'
+          value: '90'
+          description: 'Trigger Disk Utilization Threshold'
+        - macro: '{$TRIGGER_MEM_TIME_RANGE}'
+          value: 30m
+          description: 'Trigger ''Memory Usage at ...'' time frame'
+        - macro: '{$TRIGGER_MEM_UTILIZATION}'
+          value: '90'
+          description: 'Trigger Memory Utilization Threshold'
+        - macro: '{$TRIGGER_PROTO_EVAL_TIME}'
+          value: '100'
+          description: 'Trigger Server Protocol Eval Time Threshold in ms'
+        - macro: '{$TRIGGER_RAD_REQ_TIME}'
+          value: '500'
+          description: 'Trigger Radius Request Time Threshold in ms'
+        - macro: '{$TRIGGER_TAC_REQ_TIME}'
+          value: '500'
+          description: 'Trigger Tacacs Request Time Threshold in ms'
+        - macro: '{$UPDATE_INTERVAL}'
+          value: 5m
+          description: 'SNMP Walk Update Interval'
+  triggers:
+    - uuid: 624d55bfb5ff499998378d694d5079bd
+      expression: '(max(/Aruba Clear Pass Policy Manager SNMP/radServerCounterFailure,{$TRIGGER_AUTH_FAILED_RANGE})-min(/Aruba Clear Pass Policy Manager SNMP/radServerCounterFailure,{$TRIGGER_AUTH_FAILED_RANGE}))>0 and (max(/Aruba Clear Pass Policy Manager SNMP/radServerCounterSuccess,{$TRIGGER_AUTH_FAILED_RANGE})-min(/Aruba Clear Pass Policy Manager SNMP/radServerCounterSuccess,{$TRIGGER_AUTH_FAILED_RANGE}))=0'
+      name: 'Only Radius Auth Failed in last {$TRIGGER_AUTH_FAILED_RANGE}'
+      priority: AVERAGE
+    - uuid: b3ba78e22f2b45a7ac6846f3b0e9d301
+      expression: '(max(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterFailure,{$TRIGGER_AUTH_FAILED_RANGE})-min(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterFailure,{$TRIGGER_AUTH_FAILED_RANGE}))>0 and (max(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterSuccess,{$TRIGGER_AUTH_FAILED_RANGE})-min(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterSuccess,{$TRIGGER_AUTH_FAILED_RANGE}))=0'
+      name: 'Only Tacacs Auth Failed in last {$TRIGGER_AUTH_FAILED_RANGE}'
+      priority: AVERAGE
