@@ -344,8 +344,8 @@ zabbix_export:
             - tag: radius
           triggers:
             - uuid: 9318c572123f460aaa4c0fce7b5550c2
-              expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/radAuthRequestTime,{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_RAD_REQ_TIME}'
-              name: 'Radius Auth Request Time at "{ITEM.VALUE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+              expression: 'min(/Aruba Clear Pass Policy Manager SNMP/radAuthRequestTime,{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_RAD_REQ_TIME}'
+              name: 'Radius Auth Request Time > {$TRIGGER_RAD_REQ_TIME} % in last "{$TRIGGER_AUTH_TIME_RANGE}"'
               priority: AVERAGE
         - uuid: 64c809363ba74f2c9434d9a4dfa89ab7
           name: 'Radius Time Policy Eval'
@@ -541,8 +541,8 @@ zabbix_export:
             - tag: tacacs+
           triggers:
             - uuid: 49c1e6c2107346b6a296df0e540669d6
-              expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterTime,{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_TAC_REQ_TIME}'
-              name: 'Tacacs Auth Request Time at "{ITEM.VALUE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+              expression: 'min(/Aruba Clear Pass Policy Manager SNMP/tacAuthCounterTime,{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_TAC_REQ_TIME}'
+              name: 'Tacacs Auth Request Time > {$TRIGGER_TAC_REQ_TIME} % in last "{$TRIGGER_AUTH_TIME_RANGE}"'
               priority: AVERAGE
         - uuid: 894391813613468f9fc39ab3b9258cb7
           name: 'Tacacs Time Policy Eval'
@@ -652,8 +652,8 @@ zabbix_export:
                   value: '{#SRV_NAME}'
               trigger_prototypes:
                 - uuid: d9996e937fe7474999119acff48cd855
-                  expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterTime[{#SNMPINDEX}],{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_PROTO_EVAL_TIME}'
-                  name: 'Server Authentication "{#SRV_NAME}": Time at "{ITEM.VALUE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+                  expression: 'min(/Aruba Clear Pass Policy Manager SNMP/psAutzCounterTime[{#SNMPINDEX}],{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_PROTO_EVAL_TIME}'
+                  name: 'Server Authentication "{#SRV_NAME}": Time > {$TRIGGER_PROTO_EVAL_TIME} % in last "{$TRIGGER_AUTH_TIME_RANGE}"'
                   priority: AVERAGE
           trigger_prototypes:
             - uuid: fd099ae8dc9f41bb936c87841a4ee593
@@ -693,8 +693,8 @@ zabbix_export:
                   value: '{#PROTO_NAME}'
               trigger_prototypes:
                 - uuid: 717b77621f5a4bd390ad8c11c3ffe034
-                  expression: 'avg(/Aruba Clear Pass Policy Manager SNMP/psPolicyEvalTime[{#SNMPINDEX}],{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_PROTO_EVAL_TIME}'
-                  name: 'Server Protocol "{#PROTO_NAME}": Eval Time at "{ITEM.VALIE}" in last {$TRIGGER_AUTH_TIME_RANGE}'
+                  expression: 'min(/Aruba Clear Pass Policy Manager SNMP/psPolicyEvalTime[{#SNMPINDEX}],{$TRIGGER_AUTH_TIME_RANGE})>{$TRIGGER_PROTO_EVAL_TIME}'
+                  name: 'Server Protocol "{#PROTO_NAME}": Eval Time > {$TRIGGER_PROTO_EVAL_TIME} % in last "{$TRIGGER_AUTH_TIME_RANGE}"'
                   priority: AVERAGE
           master_item:
             key: snmp.walk.policyServerProtoTableEntry
